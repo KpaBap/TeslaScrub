@@ -20,13 +20,14 @@ from configparser import ConfigParser
 from bs4 import BeautifulSoup
 
 log = logging.getLogger()
+BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 config = ConfigParser()
-config.read('config.ini')
+config.read(f'{BASE_PATH}/config.ini')
 
 
 def setup_logging():
-	LOG_PATH = "{}/{}.log".format(os.path.dirname(os.path.realpath(__file__)),
+	LOG_PATH = "{}/{}.log".format(BASE_PATH,
 								  os.path.basename(__file__).replace(".py", ""))
 
 	if config.getboolean('Internal', 'Debug'):
