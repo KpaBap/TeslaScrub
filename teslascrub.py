@@ -43,9 +43,10 @@ def setup_logging():
 	logging.getLogger("requests.packages.urllib3").setLevel(logging.INFO)
 
 def send_email(subject, body, from_email=config['Email']['FROM'], to_email=config['Email']['TO'], force=False):
-	seconds_left_to_boring_email = time.time() % int(config['Email']['BORING_EMAIL_FREQUENCY'])
+	seconds_since_last_email = time.time() % int(config['Email']['BORING_EMAIL_FREQUENCY'])
+	minutes_until_next_email = round((int(config['Email']['BORING_EMAIL_FREQUENCY']) - seconds_since_last_email) / 60)
 
-	if seconds_left_to_boring_email < int(config['Email']['CRONJOB_FREQUENCY']) or force:
+	if seconds_since_last_email < int(config['Email']['CRONJOB_FREQUENCY']) or force:
 		email_text = f"""From: {from_email}\r\nTo: {to_email}\r\nSubject: {subject}\r\n\r\n{body}"""
 		log.debug(f"Email contents: {email_text}")
 		try:
@@ -59,8 +60,7 @@ def send_email(subject, body, from_email=config['Email']['FROM'], to_email=confi
 		except Exception:
 			log.exception("Exception while sending email:")
 	else:
-		minutes_left = round(seconds_left_to_boring_email/60)
-		log.info(f"Skipping sending email. Will send it in {minutes_left} minutes.")
+		log.info(f"Skipping sending email. Will send it in {minutes_until_next_email} minutes.")
 
 class ScrubbingError(Exception):
 	pass
